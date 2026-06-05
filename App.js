@@ -4,6 +4,7 @@ import { SafeAreaProvider } from "react-native-safe-area-context";
 import { NavigationContainer } from "@react-navigation/native";
 import { createNativeStackNavigator } from "@react-navigation/native-stack";
 
+// Importamos nuestras pantallas
 import Home from "./src/screens/HomeScreen";
 import DetailsScreen from "./src/screens/DetailsScreen";
 
@@ -13,6 +14,7 @@ export default function App() {
   const [pokemons, setPokemons] = useState([]);
   const [pokemon, setPokemon] = useState(null);
 
+  // Cargamos la lista inicial de pokemons
   useEffect(() => {
     const getPokemons = async () => {
       try {
@@ -28,6 +30,7 @@ export default function App() {
     getPokemons();
   }, []);
 
+  // Función para obtener los datos de un pokemon específico
   const getPokemon = async (nombre) => {
     try {
       const res = await fetch(
@@ -45,9 +48,10 @@ export default function App() {
       <NavigationContainer>
         <Stack.Navigator
           screenOptions={{
-            headerShown: false,
+            headerShown: false, // Ocultamos el header por defecto para usar los nuestros
           }}
         >
+          {/* Pantalla Principal */}
           <Stack.Screen name="Home">
             {(props) => (
               <Home
@@ -59,6 +63,7 @@ export default function App() {
             )}
           </Stack.Screen>
 
+          {/* Pantalla de Detalles */}
           <Stack.Screen
             name="Detalles"
             component={DetailsScreen}
@@ -69,3 +74,4 @@ export default function App() {
     </SafeAreaProvider>
   );
 }
+

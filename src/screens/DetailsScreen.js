@@ -8,6 +8,7 @@ import {
   ActivityIndicator,
   ScrollView,
 } from "react-native";
+// Importamos las constantes del tema para los colores de tipos y estadísticas
 import {
   TYPE_COLORS,
   STAT_TRANSLATIONS,
@@ -16,10 +17,12 @@ import {
 } from "../constants/theme";
 
 const DetailsScreen = ({ route, navigation }) => {
+  // Obtenemos el nombre del pokemon desde los parámetros de navegación
   const { name } = route.params;
   const [pokemon, setPokemon] = useState(null);
   const [loading, setLoading] = useState(true);
 
+  // Hook para cargar los detalles cuando se entra a la pantalla
   useEffect(() => {
     const fetchDetails = async () => {
       try {
@@ -35,19 +38,23 @@ const DetailsScreen = ({ route, navigation }) => {
     fetchDetails();
   }, [name]);
 
+  // Pantalla de carga mientras esperamos la API
   if (loading) {
     return (
       <View style={styles.loadingContainer}>
         <ActivityIndicator size="large" color={POKEDEX_RED} />
+        <Text style={{ marginTop: 10 }}>Cargando datos...</Text>
       </View>
     );
   }
 
+  // Determinamos el color de fondo basado en el primer tipo del pokemon
   const primaryType = pokemon.types[0].type.name;
   const bgColor = TYPE_COLORS[primaryType] || "#ddd";
 
   return (
     <ScrollView style={styles.detailsContainer} bounces={false}>
+      {/* Cabecera con imagen y nombre */}
       <View style={[styles.detailsHeader, { backgroundColor: bgColor }]}>
         <Pressable
           style={styles.backButton}
@@ -55,18 +62,22 @@ const DetailsScreen = ({ route, navigation }) => {
         >
           <Text style={styles.backButtonText}>← VOLVER</Text>
         </Pressable>
+        
         <Image
           source={{ uri: pokemon.sprites.other["official-artwork"].front_default }}
           style={styles.detailImage}
         />
+        
         <Text style={styles.detailName}>{pokemon.name.toUpperCase()}</Text>
+        
+        {/* Etiquetas de tipos */}
         <View style={styles.typeRow}>
           {pokemon.types.map((t) => (
             <View
               key={t.type.name}
               style={[
                 styles.typeBadge,
-                { backgroundColor: TYPE_COLORS[t.type.name] },
+                { backgroundColor: TYPE_COLORS[t.type.name] || "#777" },
               ]}
             >
               <Text style={styles.typeText}>{t.type.name.toUpperCase()}</Text>
@@ -75,6 +86,7 @@ const DetailsScreen = ({ route, navigation }) => {
         </View>
       </View>
 
+      {/* Sección de información y estadísticas */}
       <View style={styles.infoSection}>
         <View style={styles.statsRow}>
           <View style={styles.statBox}>
@@ -88,22 +100,30 @@ const DetailsScreen = ({ route, navigation }) => {
         </View>
 
         <Text style={styles.sectionTitle}>Estadísticas Base</Text>
-        {pokemon.stats.map((s) => (
-          <View key={s.stat.name} style={styles.statLine}>
-            <Text style={styles.statName}>
-              {STAT_TRANSLATIONS[s.stat.name] || s.stat.name}
-            </Text>
-            <View style={styles.statBarBg}>
-              <View
-                style={[
-                  styles.statBarFill,
-                  { width: `${Math.min(100, (s.base_stat / 150) * 100)}%` },
-                ]}
-              />
+        
+        <View style={styles.statsContainer}>
+          {pokemon.stats.map((s) => (
+            <View key={s.stat.name} style={styles.statLine}>
+              <Text style={styles.statName}>
+                {STAT_TRANSLATIONS[s.stat.name] || s.stat.name}
+              </Text>
+              
+              <View style={styles.statBarBg}>
+                <View
+                  style={[
+                    styles.statBarFill,
+                    { 
+                      width: `${Math.min(100, (s.base_stat / 150) * 100)}%`,
+                      backgroundColor: bgColor // Usamos el color del tipo para la barra
+                    },
+                  ]}
+                />
+              </View>
+              
+              <Text style={styles.statNumber}>{s.base_stat}</Text>
             </View>
-            <Text style={styles.statNumber}>{s.base_stat}</Text>
-          </View>
-        ))}
+          ))}
+        </View>
       </View>
     </ScrollView>
   );
@@ -114,15 +134,27 @@ const styles = StyleSheet.create({
     flex: 1,
     justifyContent: "center",
     alignItems: "center",
+    backgroundColor: "white",
+  },
+  detailsContainer: {
+    flex: 1,
+    backgroundColor: "#fff",
+  },
+  detailsHeader: {
+    paddingTop: 50,
+    paddingBottom: 40,
+    alignItems: "center",
+    borderBottomLeftRadius: 40,
+    borderBottomRightRadius: 40,
   },
   backButton: {
     position: "absolute",
-    top: 20,
+    top: 50,
     left: 20,
-    backgroundColor: "rgba(255,255,255,0.3)",
-    paddingHorizontal: 15,
-    paddingVertical: 8,
-    borderRadius: 20,
+    backgroundColor: "rgba(0,0,0,0.2)",
+    paddingHorizontal: 12,
+    paddingVertical: 6,
+    borderRadius: 15,
     zIndex: 10,
   },
   backButtonText: {
@@ -130,33 +162,19 @@ const styles = StyleSheet.create({
     fontWeight: "bold",
     fontSize: 12,
   },
-  detailsContainer: {
-    flex: 1,
-    backgroundColor: "#fff",
-  },
-  detailsHeader: {
-    paddingTop: 20,
-    paddingBottom: 40,
-    alignItems: "center",
-    borderBottomLeftRadius: 40,
-    borderBottomRightRadius: 40,
-  },
   detailImage: {
-    width: 250,
-    height: 250,
+    width: 220,
+    height: 220,
   },
   detailName: {
     fontSize: 32,
     fontWeight: "bold",
     color: "#fff",
     marginTop: 10,
-    textShadowColor: "rgba(0, 0, 0, 0.2)",
-    textShadowOffset: { width: 1, height: 1 },
-    textShadowRadius: 2,
   },
   typeRow: {
     flexDirection: "row",
-    marginTop: 10,
+    marginTop: 15,
   },
   typeBadge: {
     paddingHorizontal: 15,
@@ -164,15 +182,15 @@ const styles = StyleSheet.create({
     borderRadius: 20,
     marginHorizontal: 5,
     borderWidth: 1,
-    borderColor: "rgba(255,255,255,0.3)",
+    borderColor: "rgba(255,255,255,0.4)",
   },
   typeText: {
     color: "#fff",
     fontWeight: "bold",
-    fontSize: 12,
+    fontSize: 13,
   },
   infoSection: {
-    padding: 20,
+    padding: 25,
   },
   statsRow: {
     flexDirection: "row",
@@ -193,37 +211,43 @@ const styles = StyleSheet.create({
     color: POKEDEX_DARK,
   },
   sectionTitle: {
-    fontSize: 20,
+    fontSize: 22,
     fontWeight: "bold",
     color: POKEDEX_DARK,
-    marginBottom: 15,
+    marginBottom: 20,
+    borderBottomWidth: 2,
+    borderBottomColor: "#eee",
+    paddingBottom: 5,
+  },
+  statsContainer: {
+    marginTop: 5,
   },
   statLine: {
     flexDirection: "row",
     alignItems: "center",
-    marginBottom: 12,
+    marginBottom: 15,
   },
   statName: {
-    width: 90,
-    fontSize: 12,
-    color: "#666",
+    width: 100,
+    fontSize: 14,
+    color: "#555",
+    fontWeight: "600",
   },
   statBarBg: {
     flex: 1,
-    height: 10,
+    height: 12,
     backgroundColor: "#eee",
-    borderRadius: 5,
+    borderRadius: 6,
     marginHorizontal: 10,
     overflow: "hidden",
   },
   statBarFill: {
     height: "100%",
-    backgroundColor: POKEDEX_RED,
-    borderRadius: 5,
+    borderRadius: 6,
   },
   statNumber: {
     width: 35,
-    fontSize: 12,
+    fontSize: 14,
     fontWeight: "bold",
     color: POKEDEX_DARK,
     textAlign: "right",
